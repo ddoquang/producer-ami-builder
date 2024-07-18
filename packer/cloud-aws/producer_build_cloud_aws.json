@@ -21,7 +21,7 @@
             "instance_type": "{{user `instance_type`}}",
             "associate_public_ip_address": true,
             "communicator": "ssh",
-            "ssh_username": "centos",
+            "ssh_username": "rocky",
             "tags": {
                 "Name": "Producer-Cloud-{{user `application_version_tag`}}-{{user `build_version`}}",
                 "OS_Version": "{{user `os_version_tag`}}",
