@@ -36,10 +36,8 @@
         {
             "type": "shell",
             "inline": [
-                       "sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7",
-                       "sudo yum install -y epel-release",
-                       "sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7",
-                       "sudo yum install -y ansible"
+                       "sudo dnf install -y epel-release",
+                       "sudo dnf install -y ansible"
                       ]
         },
         {
