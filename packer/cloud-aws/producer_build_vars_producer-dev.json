@@ -11,7 +11,7 @@
     "os_version_tag": "CentOS 7",
     "application_tag": "producer",
     "application_version_tag": "99.99.99.028",
-    "source_ami": "ami-02b8a93090a2966fe",
+    "source_ami": "ami-0351b6eaec1947c56",
     "deployment_stage": "undeployed",
     "aws_account_id": "686127332902"
 }
