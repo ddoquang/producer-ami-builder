@@ -1,0 +1,60 @@
+---
+# UIDs for RnD users: 3000 to 3499
+- include_vars: ../defaults/rnd.yml
+
+- name: Add RnD group
+  group:
+    name: rnd
+    state: present
+    gid: 3000
+
+- name: Ensure RnD group is in sudoers
+  lineinfile:
+    path: /etc/sudoers.d/toonboom
+    state: present
+    regexp: '^%rnd'
+    line: '%rnd ALL=(ALL) NOPASSWD: ALL'
+    create: yes
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Add RnD users (Cloud)
+  user:
+    name: "{{ item.name }}"
+    state: present
+    groups: rnd
+    append: yes
+    uid: "{{ item.uid }}"
+  with_items:
+    - "{{ RnD }}"
+  when: ansible_system_vendor == "Amazon EC2"
+
+- name: Add RnD users (Studio)
+  user:
+    name: "{{ item.name }}"
+    state: present
+    groups: rnd
+    append: yes
+    password: "{{ item.password | password_hash('sha512') }}"
+    uid: "{{ item.uid }}"
+    update_password: on_create
+  with_items:
+    - "{{ RnD }}"
+  when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."
+
+- name : Add RnD authorized keys
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ lookup('file', '{{ inventory_dir }}/roles/users/files/ssh_keys/' + item.name + '.pub') }}"
+  with_items:
+    - "{{ RnD }}"
+  when: ansible_system_vendor == "Amazon EC2"
+  
+- name: Add RnD bash profiles
+  template:
+    src: bash_profile.template
+    dest: /home/{{ item.name }}/.bash_profile
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0644'
+  with_items:
+    - "{{ RnD }}"

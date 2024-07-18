@@ -1,0 +1,23 @@
+---
+# defaults file for postgresql
+
+# Set major version of PostgreSQL
+pg_version: 15
+
+# PostgreSQL yum repository
+pg_repo_url: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+pg_enablerepo: "pgdg{{ pg_version }}"
+
+# Packages to install for PostgreSQL
+pg_packages:
+  - postgresql{{ pg_version }}-server
+  - postgresql{{ pg_version }}-contrib
+  - libpq5-devel
+
+pg_dir: "/var/lib/pgsql/{{ pg_version }}"
+
+pg_user: postgres
+# PostgreSQL must not have a password for Producer.
+# See https://docs.google.com/document/d/1oA2V4mvUAQDhAPpg23Yp5rgfHpSPKeEHp_ADGJ6g8T4
+pg_password:
+pg_group: postgres

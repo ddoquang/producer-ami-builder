@@ -1,0 +1,5 @@
+---
+# defaults file for ssm
+
+AWS_SSM:
+  - https://s3.ca-central-1.amazonaws.com/amazon-ssm-ca-central-1/latest/linux_amd64/amazon-ssm-agent.rpm

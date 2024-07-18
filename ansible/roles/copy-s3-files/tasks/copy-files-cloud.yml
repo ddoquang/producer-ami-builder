@@ -1,0 +1,25 @@
+---
+- name: Gather EC2 metadata facts
+  ec2_metadata_facts:
+
+# Ansible aws_s3 doesn't allow wildcards.
+# We must list the items in an S3 bucket and store them in a variable.
+- name: Get items in S3 bucket (Cloud)
+  aws_s3:
+    bucket: "{{ s3_bucket }}"
+    mode: list
+    region: "{{ s3_bucket_region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: s3_items_cloud
+
+- name: Copy items in S3 to Producer vm (Cloud)
+  aws_s3:
+    bucket: "{{ s3_bucket }}"
+    object: "{{ item }}"
+    dest: "/producer-temp/{{ item|basename }}"
+    mode: get
+    region: "{{ s3_bucket_region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  with_items: "{{ s3_items_cloud.s3_keys }}"

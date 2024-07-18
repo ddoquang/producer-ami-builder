@@ -1,0 +1,18 @@
+---
+# tasks file for cloudwatch
+- name: Install Cloudwatch Agent rpm
+  dnf:
+    name: "{{ cloudwatch_agent_rpm }}"
+    state: present
+
+- name: Create Cloudwatch config
+  # Config.json must be in an absolute path, otherwise amazon-cloudwatch-agent-ctl command fails.
+  template:
+    src: ../templates/config.json.j2
+    dest: /tmp/config.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Cloudwatch Agent
+  shell: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/tmp/config.json

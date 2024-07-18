@@ -1,0 +1,42 @@
+---
+# tasks file for postgresql
+
+# Epel repo is required for Postgresql
+- name: Add EPEL repository
+  dnf:
+    name: epel-release
+    state: present
+
+- name: Add Postgresql repository
+  dnf:
+    name: "{{ pg_repo_url }}"
+    state: present
+
+- name: Install Postgresql packages
+  dnf:
+    name: "{{ pg_packages }}"
+    state: present
+    enablerepo: "{{ pg_enablerepo | default(omit, true) }}"
+
+- name: Check if Postgresql cluster directory exists
+  stat: path={{ pg_dir }}/data/postgresql.conf
+  register: pg_data_dir
+
+- name: Initialize Postgresql cluster
+  command: /usr/pgsql-"{{ pg_version }}"/bin/postgresql-"{{ pg_version }}"-setup initdb
+  when: pg_data_dir.stat.exists == False
+
+- name: Configure host-based authentication for Producer
+  copy:
+    src: ../files/pg_hba.conf
+    dest: "{{ pg_dir }}/data/pg_hba.conf"
+    mode: '0600'
+    owner: "{{ pg_user }}"
+    group: "{{ pg_group }}"
+
+- name: Start and enable Postgresql
+  service:
+    name: postgresql-{{ pg_version }}
+    state: started
+    enabled: yes
+

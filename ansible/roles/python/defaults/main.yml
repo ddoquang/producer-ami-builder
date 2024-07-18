@@ -1,0 +1,11 @@
+---
+# defaults file for python
+# Set major version of Python
+python_version: 2
+
+# Packages to install for Python
+python_packages:
+  - python{{ python_version }}
+  - python{{ python_version}}-pip
+  - python{{ python_version }}-devel
+

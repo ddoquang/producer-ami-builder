@@ -1,0 +1,38 @@
+---
+# tasks file for common
+- name: Set hostname
+  hostname:
+    name: "{{ host_name }}"
+
+- name: Persist hostname in cloud-init for EC2
+  lineinfile:
+    path: /etc/cloud/cloud.cfg
+    state: present
+    insertafter: EOF
+    line: 'preserve_hostname: true'
+  when: ansible_system_vendor == "Amazon EC2"
+
+- name: Add EPEL repository
+  dnf:
+    name: 'epel-release'
+    state: present
+
+- name: Upgrade all packages
+  dnf:
+    name: '*'
+    state: latest
+    
+- name: Install software requirements for Producer
+  dnf:
+    name: "{{ producer_software_requirements }}"
+    state: present
+
+- name: Install NodeJS repository
+  dnf:
+    name: "{{ node_repo }}"
+    state: present
+
+- name: Install NodeJS
+# --setopt not supported by Ansible dnf module.  Must use command module instead.
+  command: dnf install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1
+

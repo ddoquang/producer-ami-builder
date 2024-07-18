@@ -1,0 +1,22 @@
+---
+# defaults file for rabbitmq
+erlang_repo: https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh
+
+# RabbitMQ install repo script.  
+# See https://packagecloud.io/rabbitmq/rabbitmq-server/install#bash-rpm
+rabbitmq_repo: packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh 
+
+# Packages to install for RabbitMQ
+rabbitmq_packages: 
+  - rabbitmq-server
+
+rabbitmq_user: webcc
+rabbitmq_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          64636563376634643737373736636536613565396138353533313938646339636537383637353439
+          3162313530613433393437623462346232393632346265310a656338383830653637393263623634
+          38613564323135306638393763396264366265396536666532366361623437643364653961633562
+          3263346264653661320a623338313438383164643438313439303530373632393763323166633562
+          3932
+
+rabbitmq_heartbeat: 600

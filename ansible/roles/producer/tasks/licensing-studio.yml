@@ -1,0 +1,28 @@
+---
+# task file for Flexnet Licensing server.
+- include_vars: ../defaults/main.yml
+
+- name: Create producer_shared_vboxsf folder
+  file:
+    path: /mnt/producer_shared_vboxsf
+    state: directory
+    mode: '0755'
+    owner: "{{ producer_user }}"
+    group: "{{ producer_user }}"
+
+- name: Create symlink to producer_shared folder
+  file:
+    src: /mnt/producer_shared_vboxsf
+    dest: /producer_shared
+    state: link
+    owner: "{{ producer_user }}"
+    group: "{{ producer_user }}"
+
+- name: Create systemd mount file
+  copy:
+    src: "{{ producer_install_dir }}/tactic/src/install/service/mnt-producer_shared_vboxsf.mount"
+    dest: /etc/systemd/system/mnt-producer_shared_vboxsf.mount
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0644'

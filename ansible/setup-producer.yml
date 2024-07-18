@@ -1,0 +1,34 @@
+- name: Provision Producer VM
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_method: sudo
+  roles:
+    - role: common-vmware
+      when: ansible_system_vendor == "VMware, Inc."
+    - role: common-vbox
+      when: ansible_virtualization_type == "virtualbox"
+    - role: common
+    - role: users
+    - role: firewalld
+      when: ansible_system_vendor == "Amazon EC2"
+    - role: firewalld-studio
+      when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."
+    - role: postgresql
+    - role: database-backup-cloud
+      when: ansible_system_vendor == "Amazon EC2"
+    - role: database-backup-studio
+      when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."
+    - role: python
+    - role: copy-s3-files
+    - role: rabbitmq
+    - role: ffmpeg
+    - role: redis
+    - role: producer
+    - role: logrotate
+    - role: cloudwatch
+      when: ansible_system_vendor == "Amazon EC2"
+    - role: ssm
+      when: ansible_system_vendor == "Amazon EC2"
+    - role: deactivate_services_for_cloud
+      when: ansible_system_vendor == "Amazon EC2"

@@ -1,0 +1,35 @@
+---
+# tasks file for ec2-database-backup
+
+- name: Create Postgresql backup folder
+  file:
+    path: "{{ pg_backups_path }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ pg_user }}"
+    group: "{{ pg_group }}"
+
+- name: Create Postgresql cron log folder
+  file:
+    path: "{{ pg_dir }}/cron/log"
+    state: directory
+    mode: '0755'
+    owner: "{{ pg_user }}"
+    group: "{{ pg_group }}"
+
+- name: Copy Postgresql backup script to vm
+  copy:
+    src: ../files/pgsql_backup.sh
+    dest: "/{{ pg_dir }}/cron/pgsql_backup.sh"
+    mode: '0755'
+    owner: "{{ pg_user }}"
+    group: "{{ pg_group }}"
+
+- name: Create Postgresql backup cron entry
+  cron:
+    user: "{{ pg_user }}"
+    name: "PgSQL Backup"
+    minute: "0"
+    hour: "*/4"
+    job: "{{ pg_dir }}/cron/pgsql_backup.sh > /dev/null 2>&1"
+    state: present

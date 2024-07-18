@@ -1,0 +1,12 @@
+---
+# tasks file for ssm
+- name: Install AWS SSM age agent
+  dnf:
+    name: "{{ AWS_SSM }}"
+    state: present
+
+- name: Start and enable AWS SSM agent
+  service:
+    name: amazon-ssm-agent
+    state: started
+    enabled: yes

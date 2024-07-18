@@ -1,0 +1,89 @@
+---
+- name: Get the current kernel release.
+  command: uname -r
+  changed_when: false
+  register: kernel_release
+
+- name: Set the appropriate libselinux package for RHEL 8.
+  set_fact:
+    packer_rhel_libselinux_package: python3-libselinux
+  when: ansible_distribution_major_version == '8'
+
+- name: Ensure necessary packages are installed.
+  dnf:
+    name:
+      - wget
+      - perl
+      - cpp
+      - gcc
+      - make
+      - bzip2
+      - kernel-headers
+      - kernel-devel
+      - "kernel-devel-{{ kernel_release.stdout }}"
+      - "{{ packer_rhel_libselinux_package }}"
+      - elfutils-libelf-devel
+      - cifs-utils
+    state: present
+
+# Fix slow DNS.
+- name: Fix slow DNS (adapted from Bento).
+  lineinfile:
+    dest: /etc/sysconfig/network
+    regexp: '^RES_OPTIONS'
+    line: 'RES_OPTIONS="single-request-reopen"'
+    state: present
+
+- name: Restart network service (RHEL < 8).
+  service: name=network state=restarted
+  when: ansible_distribution_major_version < '8'
+
+# SSH daemon configuration.
+- name: Configure SSH daemon.
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - { regexp: '^UseDNS', line: 'UseDNS no' }
+    - { regexp: '^GSSAPIAuthentication', line: 'GSSAPIAuthentication no' }
+
+# VirtualBox tools installation.
+- include_tasks: virtualbox.yml
+
+# Cleanup tasks.
+- name: Remove unneeded packages.
+  dnf:
+    name:
+      - cpp
+      - kernel-devel
+      - kernel-headers
+    state: absent
+
+- name: Clean up dnf.
+  command: >
+    dnf clean all
+    warn=false
+  changed_when: true
+
+- name: Remove any remnants of VirtualBox ISOs.
+  shell: >
+    rm -rf VBoxGuestAdditions_*.iso VBoxGuestAdditions_*.iso.?
+    warn=false
+  tags: ['skip_ansible_lint']
+
+- name: Remove RedHat interface persistence (step 1).
+  command: >
+    rm -f /etc/udev/rules.d/70-persistent-net.rules
+    warn=false
+  tags: ['skip_ansible_lint']
+
+- name: Remove RedHat interface persistence (step 2).
+  lineinfile:
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+    regexp: "{{ item }}"
+    state: absent
+  with_items:
+    - '^HWADDR'
+    - '^UUID'

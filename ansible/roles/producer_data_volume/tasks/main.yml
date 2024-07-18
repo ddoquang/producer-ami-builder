@@ -1,0 +1,26 @@
+---
+# tasks file for producer_data_volume
+- name: Create filesystem on Producer data volume
+  filesystem:
+    fstype: xfs
+    dev: "{{ producer_data_vol }}"
+
+- name: Get UUID of Producer data volume
+  command: blkid -s UUID -o value {{ producer_data_vol }}
+  register: uuid_producer_data_vol
+
+- name: Create Producer data directory
+  file:
+    path: "{{ producer_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Mount Producer data volume
+  mount:
+    path: "{{ producer_data_dir }}"
+    src: "UUID={{ uuid_producer_data_vol.stdout }}"
+    fstype: xfs
+    opts: defaults,nofail
+    dump: '0'
+    passno: '2'
+    state: mounted

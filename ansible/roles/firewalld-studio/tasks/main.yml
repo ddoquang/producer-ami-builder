@@ -1,0 +1,32 @@
+---
+# tasks file for firewalld-vbox
+- name: Install firewalld
+  dnf:
+    name: firewalld
+    state: present
+ 
+- name: Configure firewalld
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+    - "{{ open_ports }}"
+
+- name: Redirect port 80 to 8080 with Rich Rule
+  firewalld:
+    rich_rule: rule family=ipv4 forward-port port=80 protocol=tcp to-port=8080
+    permanent: yes
+    state: enabled
+
+- name: Redirect port 443 to 4443 with Rich Rule
+  firewalld:
+    rich_rule: rule family=ipv4 forward-port port=443 protocol=tcp to-port=4443
+    permanent: yes
+    state: enabled
+
+- name: Start and enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes

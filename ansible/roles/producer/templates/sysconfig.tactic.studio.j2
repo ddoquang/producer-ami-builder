@@ -1,0 +1,179 @@
+#
+# Configuration file for the tactic service.
+#
+#   /etc/sysconfig/tactic
+#
+# Sets environment variables used in:
+#
+#   $PRODUCER_HOME/tactic_data/config/tactic-conf.xml
+#   /etc/systemd/system/tactic.service
+#   /etc/systemd/system/bridge.service
+#
+
+# Base URL used in Welcome User email to go to login page, as well as oAuth services
+# eg: https://subdomain.producercloud.io, or http://192.168.56.134:8080
+# If using Google oAuth, BASE_URL needs to be a fully qualified domain
+export BASE_URL=
+
+# Producer user
+export PRODUCER_USER={{ producer_user }}
+
+# Producer home dir
+export PRODUCER_HOME={{ producer_home }}
+
+# Path to tactic data (logs, license, configuration...)
+export TACTIC_DATA_DIR=$PRODUCER_HOME/tactic_data
+
+export LOG_DIR=$TACTIC_DATA_DIR/logs
+
+# Path to tactic temporary files
+export TACTIC_TEMP_DIR=$PRODUCER_HOME/tactic_temp
+
+# Path to tactic "plugins"
+export TACTIC_PLUGIN_DIR=$TACTIC_DATA_DIR/plugins
+# export TACTIC_PLUGIN_DIR=$PRODUCER_HOME/studio
+
+# Directory where assets are to be kept
+export ASSETS_BASE_DIR=$PRODUCER_HOME/assets
+
+# Number of tactic processes to start
+# - must update /etc/httpd/conf.d/producer.conf.include to match
+export TACTIC_PROCESS_COUNT=8
+# Initial and max number of threads in the pool
+export TACTIC_THREAD_COUNT=12
+export TACTIC_THREAD_COUNT_MAX=20
+
+# The deprecated TACTIC_MAX_PORT is derived from TACTIC_MIN_PORT and TACTIC_PROCESS_COUNT
+# E.g. 8081 to 8088 matches 8 tactic processes
+export TACTIC_MIN_PORT=8081
+
+#export TACTIC_HOST=http://127.0.0.1
+
+# PostgreSQL server hostname or address.
+# Don't forget to whitelist Producer server IP address in producer_database vm's pg_hba.conf
+export DATABASE_SERVER=127.0.0.1  # This needs to be set regardless of DATABASE_URL
+export DB_USER=postgres
+export DB_PASSWORD=''  # postgres user password not set
+export DB_PORT=5432
+export DATABASE_URL='postgresql://$DB_USER:$DB_PASSWORD@$DATABASE_SERVER:$DB_PORT'
+
+export PRODUCER_DB_BACKUP_DIR=/var/producer/backups
+
+# Expiry delay of a Producer login ticket.
+export SECURITY_TICKET_EXPIRY="1 year"
+
+# Expiry delay of a Producer GUI login ticket.
+export SECURITY_TICKET_GUI_EXPIRY="2 hour"
+
+# UPGRADE_INSECURE (Default: true)
+# If set, will add a upgrade-insecure-requests http header, so browsers will automatically upgrade any requests to https
+# Set this value to true (default) when using only https, or both http and https
+# Set this value to false when using http only.
+# export UPGRADE_INSECURE=false  # Uncomment this line if using http only
+
+# Enable http protocol on specified port (can be used along with https to enable both)
+export BRIDGE_HTTP_PORT={{ bridge_http_port }}
+
+# Enable https protocol on specified port (can be used along with http to enable both)
+# export BRIDGE_HTTPS_PORT={{ bridge_https_port }}
+
+# The private key file for the SSL session
+# export BRIDGE_HTTPS_KEY={{ tls_key_path }}your_private_key.key
+
+# The certificate file for the SSL session
+# export BRIDGE_HTTPS_CERT={{ tls_cert_path }}your_ssl_certificate.crt
+
+# The certificate authorities. A list of filename, separated by a comma
+# export BRIDGE_HTTPS_CA={{ tls_cert_path }}your_ca_bundle.crt
+
+# Generate a secret token of at least 256 bits and set its value below
+# To generate a token, it is recommended to use this command :
+# openssl rand 64 | openssl enc -A -base64
+# export BRIDGE_COOKIE_SECRET= # Replace with your secret secure bridge cookie token
+
+# Generate a secret token of at least 256 bits and set its value below
+# To generate a token, it is recommended to use this command :
+# openssl rand 64 | openssl enc -A -base64
+# export BRIDGE_TOKEN_SECRET= # Replace with your secret secure bridge token
+
+# Enable custom settings in the bridge
+# A sample of an overrides file can be found under /opt/producer/api/bridge/boot/producer-settings-template.yml
+# Copy this sample file to a location outside /opt/producer/api and uncomment / update next line to enable this functionality.
+# export PRODUCER_SETTINGS_OVERRIDES=$PRODUCER_HOME/config/producer-settings.yml
+
+# Enable the legacy pages like the legacy Workflows page
+export TACTIC_ENABLE_LEGACY_PAGE=false
+
+# The flexmonster licence key is necessary to enable flexmonster in producer
+# This key is unique to each customer of producer
+# Add the licence key and uncomment the next line
+# export FLEXMONSTER_LICENSE=
+
+# BRIDGE_AMQP_URL (Default: amqp://127.0.0.1)
+# The address to the AMQP server that Producer (Bridge) should use to communicate through AMQP,
+# with WebCC, Tactic, or for inter-process (worker) communication.
+# On Studio VMs, an amqp server (rabbitmq) is setup on the VM directly (amqp port needs to be opened on the VM)
+# AMQP server can also be setup on an external server. In this case, BRIDGE_AMQP_URL should be set
+# to an accessible external address (on the same server as WEBCC_AMQP_URL)
+export BRIDGE_AMQP_URL=amqp://127.0.0.1  # Default value on Studio VMs
+# export BRIDGE_AMQP_URL=amqps://user@pass:domain/vhost  # Typical value for an external amqp server
+
+# WEBCC_USE_QUEUE (Default: true)
+# Enables Harmony server integration through WebCC Queue
+export WEBCC_USE_QUEUE=true
+
+# WEBCC_USE_SEPARATE_QUEUE (Default: false)
+# When integration with Harmony WebCC is enabled, this forces Producer to put all requests in a separate message queue,
+# which allows different WebCC instances to handle different Harmony databases
+# export WEBCC_USE_SEPARATE_QUEUE=true  # Uncomment to enable
+
+# WEBCC_AMQP_URL (Default: None - as each instance of Producer may have a different address)
+# The url that should be set in WebCC to communicate with the bridge through amqp/amqps.
+# On Producer side, this address is only used for display purposes in Producer General Settings.
+# export WEBCC_AMQP_URL=amqp://webcc:toonboom@0.0.0.0  # Typical Studio setup
+# export WEBCC_AMQP_URL=amqps://username:securepassword@server/vhost  # Remote AMQP server
+
+# OAuth2 configuration
+# OAUTH_ENABLE (true|false) indicate whether to use oAuth2 (or not) for web authentication
+# export OAUTH_ENABLED=true
+# oAuth Provider - Only Google provider ("google") is supported for now
+#  - google: Requires BASE_URL to be a fully qualified domain name
+#              In Google Console (https://console.cloud.google.com/apis/credentials),
+#              URI redirect url needs to be set to $BASE_URL/api/bridge/oauth/callback
+# export OAUTH_PROVIDER=google
+# oAuth ID (also known as Client ID or Consumer Key) provided by the oAuth service
+# export OAUTH_ID=
+# oAuth Secret (also known as Client Secret or Consumer Secret) provided by the oAuth service
+# export OAUTH_SECRET=
+
+# The reCAPTCHA configuration - Invisible V2
+# use recaptcha true or false to indicate if want to use reCAPTCHA or not
+# site key and secret key from reCAPTCHA admin
+# Add flag to use recaptcha, site key, secret key and uncomment lines
+#export USE_RECAPTCHA=
+#export RECAPTCHA_SITE_KEY=
+#export RECAPTCHA_SECRET_KEY=
+
+# Analytics setup
+# ANALYTICS: Set to true to enable analytics (Countly) (Default: false => disabled)
+# export ANALYTICS=false
+# COUNTLY_URL: Url of th Countly server (required if ANALYTICS=true)
+# export COUNTLY_URL=
+# COUNTLY_APP_KEY: Countly application key (required if ANALYTICS=true)
+# export COUNTLY_APP_KEY=
+
+# PRODUCER_LINK_ANALYTICS: Enable Countly analytics for Producer Link (requires ANALYTICS=true)
+# export PRODUCER_LINK_ANALYTICS=$ANALYTICS
+# COUNTLY_PRODUCER_LINK_APP_KEY: Countly App key for Producer Link
+# export COUNTLY_PRODUCER_LINK_APP_KEY=
+
+# Outgoing Mail Server configuration
+export MAIL_SERVER=
+export MAIL_USER=
+export MAIL_PASSWORD=
+export MAIL_PORT=
+export MAIL_SENDER_ADDRESS=
+export MAIL_SENDER_NAME=
+
+# Applies production settings to running nodejs applications for better performance
+export NODE_ENV=production

@@ -1,0 +1,25 @@
+---
+# tasks file for python
+- name: Install Python and Pip
+  dnf:
+    name: "{{ python_packages }}"
+    state: present
+
+- name: Upgrade Pip
+  command: pip install --upgrade "pip < 19.1"
+
+- name: Copy Python requirements file to Producer vm
+  copy:
+    src: ../files/python-requirements.txt
+    dest: ~/python-requirements.txt
+    owner: root
+    group: root
+    mode: '0644'
+
+#- name: Install additional Python packages with Pip
+#  command: pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r ~/python-requirements.txt
+
+- name: Install additional Python packages with Pip
+  pip:
+    requirements: ~/python-requirements.txt
+    extra_args: "--trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org"

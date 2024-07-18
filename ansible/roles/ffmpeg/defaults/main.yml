@@ -1,0 +1,11 @@
+---
+# defaults file for common
+
+# Repos to install ffmpeg.  
+# See https://ffmpeg.org/download.html
+ffmpeg_repos:
+  - https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm
+
+ffmpeg_packages:
+  - ffmpeg
+  - ffmpeg-devel

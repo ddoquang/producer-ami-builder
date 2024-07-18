@@ -1,0 +1,42 @@
+---
+ #tasks file for common
+#- name: Add RPM Fusion repositories for FFMPEG
+#  yum:
+#    name: "{{ ffmpeg_repos }}"
+#    state: present
+
+#- name: Install FFMPEG (3.4 is last for this CentOS repo)
+#  yum:
+#    name: "{{ ffmpeg_packages }}"
+#    state: present
+
+#- name: Download FFMPEG latest installation script
+#  get_url:
+#    url: https://raw.githubusercontent.com/q3aql/ffmpeg-install/master/src/ffmpeg-install
+#    dest: /tmp
+#    mode: 0775
+#    owner: root
+#    group: root
+
+#- name: Install FFMPEG latest
+#  command: /tmp/ffmpeg-install --install release
+
+- name: Install FFMPEG 4.3.2
+# FFMPEG 4.3.2 is tested by RnD and retrieved from producer-files S3 bucket.
+  copy: 
+    src: "/producer-temp/ffmpeg"
+    dest: /usr/bin/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install FFProbe 4.3.2
+# Utility for FFMPEG 4.3.2 retrieved from producer-files S3 bucket.
+  copy: 
+    src: "/producer-temp/ffprobe"
+    dest: /usr/bin/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'

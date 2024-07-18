@@ -1,0 +1,13 @@
+vault-password
+.DS_Store
+*.iso
+*.box
+*.ovf
+*.ova
+*.vdi
+packer/studio-vbox/packer_cache
+packer/studio-vmware/packer_cache
+*.vmdk
+*.log
+packer/studio-vbox/builds/*
+packer/studio-vmware/builds/*

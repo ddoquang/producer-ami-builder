@@ -1,0 +1,57 @@
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/ansible.sh"
+    },
+    {
+      "type": "file",
+      "source": "/usr/local/ansible/vault-password",
+      "destination": "/tmp/vault-password"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "../../ansible/setup-producer.yml",
+      "playbook_dir": "../../ansible",
+      "inventory_groups": "producer_vm_studio",
+      "extra_arguments": ["--vault-password-file", "/tmp/vault-password", "--extra-vars", "producer_version={{user `version`}}"]
+    },
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/cleanup.sh"
+    }
+  ],
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "boot_command": [
+        "<tab>", 
+        "text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "cpus": 2,
+      "memory": 2048,
+      "disk_size": 81920,
+      "guest_os_type": "other3xLinux64Guest",
+      "headless": true,
+      "http_directory": "https",
+      "iso_urls": [
+        "Rocky-9.4-x86_64-minimal.iso",
+        "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.4-x86_64-minimal.iso"
+      ],
+      "iso_checksum": "sha256:07b94e6b1a0b0260b94c83d6bb76b26bf7a310dc78d7a9c7432809fb9bc6194a",
+      "output_directory": "builds/producer-studio-{{user `version`}}",
+      "ssh_username": "packer",
+      "ssh_port": 22,
+      "ssh_private_key_file" : "~/.ssh/packer-vmware",
+      "ssh_timeout": "1800s",
+      "shutdown_command": "sudo -S /sbin/halt -h -p",
+      "vm_name": "producer-studio-{{user `version`}}",
+      "disk_type_id": 0,
+      "format": "ovf"
+    }
+  ]
+}

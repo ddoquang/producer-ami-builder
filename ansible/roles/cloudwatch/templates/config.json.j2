@@ -1,0 +1,56 @@
+{
+	"agent": {
+    	"metrics_collection_interval": 60,
+    	"run_as_user": "root"
+	},
+	"logs": {
+    	"logs_collected": {
+        	"files": {
+            	"collect_list": [
+                	{
+                    	"file_path": "{{ producer_log_file_path }}",
+                    	"log_group_name": "producer_temp_logs",
+                    	"log_stream_name": "{instance_id}"
+                	},
+                	{
+                    	"file_path": "{{ tactic_log_file_path }}",
+                    	"log_group_name": "tactic.log",
+                    	"log_stream_name": "{instance_id}"
+                	},
+                	{
+                    	"file_path": "{{ bridge_log_file_path }}",
+                    	"log_group_name": "bridge.log",
+                    	"log_stream_name": "{instance_id}"
+                	}
+            	]
+        	}
+    	}
+	},
+	"metrics": {
+    	"append_dimensions": {
+        	"AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+        	"ImageId": "${aws:ImageId}",
+        	"InstanceId": "${aws:InstanceId}",
+        	"InstanceType": "${aws:InstanceType}"
+    	},
+    	"metrics_collected": {
+        	"disk": {
+            	"measurement": [
+                	"used_percent",
+					{"name": "used", "unit": "Gigabytes"}
+            	],
+            	"metrics_collection_interval": 60,
+            	"resources": [
+                	"/",
+									"/producer_shared"
+            	]
+        	},
+        	"mem": {
+            	"measurement": [
+                	"mem_used_percent"
+            	],
+            	"metrics_collection_interval": 60
+        	}
+    	}
+	}
+}

@@ -1,0 +1,45 @@
+---
+# task file for Flexnet Licensing server.
+- include_vars: ../defaults/main.yml
+
+- name: Copy license to Flexnet license directory
+  copy:
+    src: /producer-temp/license.dat
+    dest: "{{ flexnet_license_dir }}"
+    remote_src: yes
+
+# Cloud-only.  The license server should not be installed on Producer Studio
+- name: Create Flexnet install directory
+  file:
+    path: "{{ flexnet_install_dir }}"
+    state: directory
+  
+- name: Copy Flexnet server files to Flexnet install directory
+  copy:
+    src: "{{ producer_install_dir }}/tactic/src/install/licensing/"
+    dest: "{{ flexnet_install_dir }}"
+    remote_src: yes
+
+- name: Set permissions on Flexnet directories
+  # Recurse option doesn't exist for the copy module, so do it as a separate step.
+  file:
+    path: "{{ flexnet_install_dir }}"
+    mode: '0755'
+    owner: root
+    group: root
+    recurse: yes
+
+- name: Copy lmgrd service
+  copy: 
+    src: "{{ producer_install_dir }}/tactic/src/install/service/lmgrd.service"
+    dest: /etc/systemd/system/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable lmgrd service
+  service:
+    name: lmgrd
+    state: started
+    enabled: yes 

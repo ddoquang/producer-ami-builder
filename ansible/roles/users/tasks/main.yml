@@ -1,0 +1,5 @@
+---
+# tasks file for users
+- include_tasks: sysadmin.yml
+  when: ansible_system_vendor == "Amazon EC2"
+- include_tasks: rnd.yml

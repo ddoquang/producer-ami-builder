@@ -1,0 +1,7 @@
+---
+# defaults file for producer_data_volume
+# EC2 
+producer_data_vol: /dev/nvme1n1
+# Virtual Box
+#producer_data_vol: /dev/sdb
+producer_data_dir: /producer-data

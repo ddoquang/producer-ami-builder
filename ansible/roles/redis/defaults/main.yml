@@ -1,0 +1,9 @@
+---
+# defaults file for redis
+
+# Set major version of Redis
+#redis_version: 3.2
+
+# Packages to install for Redis
+redis_packages:
+  - redis

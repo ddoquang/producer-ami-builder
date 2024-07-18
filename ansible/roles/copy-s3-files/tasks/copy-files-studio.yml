@@ -1,0 +1,27 @@
+---
+- name: Get items in S3 bucket (Studio)
+  aws_s3:
+    bucket: "{{ s3_bucket }}"
+    mode: list
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: s3_items_studio
+
+- name: Copy items in S3 to Producer vm (Studio)
+  aws_s3:
+    bucket: "{{ s3_bucket }}"
+    object: "{{ item }}"
+    dest: "/producer-temp/{{ item|basename }}"
+    mode: get
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  with_items: "{{ s3_items_studio.s3_keys }}"
+
+- name: Copy Producer build in S3 to Producer vm (Studio)
+  aws_s3:
+    bucket: "{{ s3_bucket_studio }}"
+    object: "producer-{{ producer_version }}-linux.tar.gz"
+    dest: "/producer-temp/producer-{{ producer_version }}-linux.tar.gz"
+    mode: get
+    aws_access_key: "{{ aws_access_key_studio }}"
+    aws_secret_key: "{{ aws_secret_key_studio }}"

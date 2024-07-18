@@ -1,0 +1,36 @@
+---
+# defaults file for logrotate
+
+logrotate_packages:
+  - logrotate
+
+logrotate_config_directory: /etc
+
+logrotate_config_file: logrotate.conf
+
+logrotate_confd_directory: "{{ logrotate_config_directory }}/logrotate.d"
+
+logrotate_user: root
+
+logrotate_group: root
+
+# How often to rotate logs, either daily, weekly or monthly.
+logrotate_frequency: weekly
+
+# How many files to keep.
+logrotate_keep: 1
+
+# Should rotated logs be compressed??
+logrotate_compress: yes
+
+# Use date extension on log file names
+logrotate_dateext: no
+
+# Log files managed by logrotate
+#logrotate_entries:
+#   - name: producer_tactic_access_and_error_logs
+#     path: "/opt/producer/tactic_data/logs/*.log"
+#   - name: producer_bridge
+#     path: "/opt/producer/tactic_data/logs/bridge/*.log"
+#   - name: producer_tactic
+#     path: "/opt/producer/tactic_data/logs/tactic/.log"

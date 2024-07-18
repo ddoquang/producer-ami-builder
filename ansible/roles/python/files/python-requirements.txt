@@ -1,0 +1,9 @@
+# Boto3 is required for Ansible AWS modules.
+boto3==1.17.112
+cssselect==1.1.0
+lxml==4.8.0
+Pika==1.2.1
+Pillow==6.2.2
+psycopg2==2.8.6
+psycopg2-binary==2.8.6
+pycryptodome==3.14.1

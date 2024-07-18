@@ -1,0 +1,43 @@
+---
+# tasks file for logrotate
+
+- name: Install logrotate
+  ansible.builtin.package:
+    name: "{{ logrotate_packages }}"
+    state: present
+
+- name: Configure logrotate
+  ansible.builtin.template:
+    src: "{{ logrotate_config_file }}.j2"
+    dest: "{{ logrotate_config_directory }}/{{ logrotate_config_file }}"
+    mode: "0644"
+
+- name: Generate logrotate.d files
+  ansible.builtin.template:
+    src: entry.j2
+    dest: "{{ logrotate_confd_directory }}/{{ item.name }}"
+    mode: "0644"
+  loop: "{{ logrotate_entries }}"
+  when:
+    - logrotate_entries is defined
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Allow Logrotate to modify files in /opt/producer/tactic_data/logs
+  ansible.builtin.sefcontext:
+    target: '/opt/producer/tactic_data/logs(/.*)?'
+    setype: var_log_t
+    state: present
+
+- name: Apply new SELinux file context to /opt/producer/tactic_data/logs
+  command: restorecon -vr /opt/producer/tactic_data/logs
+
+- name: Allow Logrotate to modify files in /opt/producer/tactic_temp/log
+  ansible.builtin.sefcontext:
+    target: '/opt/producer/tactic_temp/log(/.*)?'
+    setype: var_log_t
+    state: present
+
+- name: Apply new SELinux file context to /opt/producer/tactic_temp/log
+  command: restorecon -vr /opt/producer/tactic_temp/log
+

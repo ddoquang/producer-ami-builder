@@ -1,0 +1,13 @@
+---
+# tasks file for licence install provisioned by Stackstorm
+- name: Check if any NFS mounts are present.
+  set_fact:
+    mounts_type: "{{ mounts_type }} {{ item.fstype }}"
+  no_log: true
+  with_items: "{{ ansible_mounts }}"
+
+- name: Copy PRODUCER_LICENSE environment variable to license.dat
+  copy:
+    content: "{{ lookup('env', 'PRODUCER_LICENSE') }}"
+    dest: "{{ license_folder }}/license.dat"
+    when: '"nfs" in mounts_type'

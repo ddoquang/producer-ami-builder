@@ -1,0 +1,20 @@
+---
+# tasks file for redis
+
+# Epel repo is required for Redis
+- name: Add EPEL repository
+  dnf:
+    name: "epel-release"
+    state: present
+
+- name: Install Redis packages
+  dnf:
+    name: "{{ redis_packages }}"
+    state: present
+
+- name: Start and enable Redis
+  service:
+    name: redis
+    state: started
+    enabled: yes
+

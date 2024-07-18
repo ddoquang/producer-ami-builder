@@ -1,0 +1,11 @@
+---
+# defaults file for vbox-database-backup
+
+pg_dir: "/var/lib/pgsql/{{ pg_version }}"
+
+pg_user: postgres
+# PostgreSQL must not have a password for Producer.
+# See https://docs.google.com/document/d/1oA2V4mvUAQDhAPpg23Yp5rgfHpSPKeEHp_ADGJ6g8T4
+pg_group: postgres
+
+pg_backups_path: /backups/pgsql

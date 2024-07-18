@@ -1,0 +1,9 @@
+---
+# defaults file for main.yml
+
+# Set Cloudwatch Agent RPM
+cloudwatch_agent_rpm: https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+
+producer_log_file_path: /opt/producer/tactic_temp/log/*.log
+bridge_log_file_path: /var/log/tactic.log
+tactic_log_file_path: /var/log/bridge.log

@@ -1,0 +1,17 @@
+{
+    "build_version": "{{isotime \"2006.01.02.150405\"}}",
+    "aws_region": "ca-central-1",
+    "aws_profile": "producer-dev",
+    "vpc_id": "vpc-0ab036703f1d273eb",
+    "subnet_id": "subnet-0372e515bcddc5f26",
+    "security_group_ids": "sg-0ec4978269750dfa7,sg-092662498cc1ea715",
+    "iam_instance_profile": "tba-s3-producerfiles-ro",
+    "volume_size_root": "100",
+    "instance_type": "m5.large",
+    "os_version_tag": "CentOS 7",
+    "application_tag": "producer",
+    "application_version_tag": "99.99.99.028",
+    "source_ami": "ami-02b8a93090a2966fe",
+    "deployment_stage": "undeployed",
+    "aws_account_id": "686127332902"
+}

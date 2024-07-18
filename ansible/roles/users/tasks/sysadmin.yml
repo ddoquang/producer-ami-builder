@@ -1,0 +1,45 @@
+---
+# UIDs for sysadmins users: 2500 to 2999
+- include_vars: ../defaults/sysadmin.yml
+
+- name: Add sysadmin group
+  group:
+    name: sysadmin
+    state: present
+    gid: 2500
+
+- name: Ensure sysadmin group is in sudoers
+  lineinfile:
+    path: /etc/sudoers.d/toonboom
+    state: present
+    regexp: '^%sysadmin'
+    line: '%sysadmin ALL=(ALL) NOPASSWD: ALL'
+    create: yes
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Add sysadmin users
+  user:
+    name: "{{ item.name }}"
+    state: present
+    groups: sysadmin
+    append: yes
+    uid: "{{ item.uid }}"
+  with_items:
+    - "{{ sysadmins }}"
+
+- name : Add sysadmin authorized keys
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ lookup('file', '{{ inventory_dir }}/roles/users/files/ssh_keys/' + item.name + '.pub') }}"
+  with_items:
+    - "{{ sysadmins }}"
+  
+- name: Add sysadmin bash profiles
+  template:
+    src: bash_profile.template
+    dest: /home/{{ item.name }}/.bash_profile
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0644'
+  with_items:
+    - "{{ sysadmins }}"

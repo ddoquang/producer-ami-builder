@@ -1,0 +1,31 @@
+
+---
+# task file for deactivate_services_for_cloud
+# Bridge, Tactic, Postgresql and crond must not run at boot time when AMI is created.
+
+- include_vars: ../postgresql/defaults/main.yml
+
+- name: Stop and disable Bridge service
+  service:
+    name: bridge
+    state: stopped
+    enabled: no 
+
+- name: Stop and disable Tactic service
+  service:
+    name: tactic
+    state: stopped
+    enabled: no 
+
+- name: Stop and disable Postgresql
+  service:
+    name: postgresql-{{ pg_version }}
+    state: stopped
+    enabled: no
+
+- name: Stop and disable crond service
+  service:
+    name: crond
+    state: stopped
+    enabled: no
+    

@@ -1,0 +1,197 @@
+---
+- name: Create Producer installation directory
+  file:
+    path: "{{ producer_install_dir }}"
+    state: directory
+
+- name: Extract Producer tarball
+  unarchive:
+    src: /producer-temp/producer-{{ producer_version }}-linux.tar.gz
+    dest: "{{ producer_install_dir }}"
+    remote_src: yes
+
+- name: Generate Bridge cookie secret
+  shell: openssl rand 64 | openssl enc -A -base64
+  register: bridge_cookie_secret
+
+- name: Generate Bridge token secret
+  shell: openssl rand 64 | openssl enc -A -base64
+  register: bridge_token_secret
+
+- name: Copy Tactic Cloud sysconfig (Cloud)
+  template:
+    src: ../templates/sysconfig.tactic.cloud.j2
+    dest: /etc/sysconfig/tactic 
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_system_vendor == "Amazon EC2"
+
+- name: Copy Tactic Studio sysconfig (Studio)
+  template:
+    src: ../templates/sysconfig.tactic.studio.j2
+    dest: /etc/sysconfig/tactic 
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."
+
+- name: Install Tactic binary
+  copy: 
+    src: "{{ producer_install_dir }}/tactic/src/install/service/tactic"
+    dest: /usr/local/bin/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install Tactic service
+  copy: 
+    src: "{{ producer_install_dir }}/tactic/src/install/service/tactic.service"
+    dest: /etc/systemd/system/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Enable Tactic service
+  service:
+    name: tactic
+    enabled: yes
+
+- name: Copy Bridge binary
+  copy: 
+    src: "{{ producer_install_dir }}/tactic/src/install/service/bridge"
+    dest: /usr/local/bin/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy Bridge service
+  copy: 
+    src: "{{ producer_install_dir }}/tactic/src/install/service/bridge.service"
+    dest: /etc/systemd/system/
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Enable Bridge service
+  service:
+    name: bridge
+    enabled: yes 
+
+- name: Copy Producer CLI bash file
+  copy:
+    src: "{{ producer_install_dir }}/bootstrap/producer-cli"
+    dest: /usr/local/bin/producer  
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create Producer user
+  user:
+    name: "{{ producer_user }}"
+    state: present
+
+- name: Install Producer
+  # Multiple commands must be passed in a shell as one line.
+  # Separate shell commands will not work as the python script relies on sourcing the variables first.
+  shell: source /etc/sysconfig/tactic; cd $INSTALL_DIR; echo y | python "{{ producer_install_dir }}/tactic/src/install/install.py" -y --from_dir="{{ producer_install_dir }}" --link_tactic
+
+- name: Reset Producer
+  command: /usr/local/bin/producer prodlinks "{{ producer_install_dir }}"
+
+- name: Cleanup Producer installation directory
+  file:
+    path: "{{ producer_home }}/tactic_src_5.0.0.b04/"
+    state: absent
+
+- name: Create directories
+  file: 
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ producer_user }}"
+    group: "{{ producer_user }}"
+  with_items:
+    - "{{ tactic_logs_dir }}/tactic"
+    - "{{ tactic_logs_dir }}/bridge"
+    - "{{ producer_home }}/tactic_temp/locale"
+    - "{{ tactic_data_dir }}/dist"
+
+- name: Create Flexnet license directory
+  file:
+    path: "{{ flexnet_license_dir }}"
+    state: directory
+    
+# Licensing for Studio
+- include_tasks: licensing-studio.yml
+  when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."
+
+# Licensing for cloud
+- include_tasks: licensing-cloud.yml
+#  when: ansible_system_vendor == "Amazon EC2"
+
+- name: Set permissions on Producer directories
+  file:
+    path: "{{ item }}"
+    mode: '0755'
+    owner: "{{ producer_user }}"
+    group: "{{ producer_user }}"
+    recurse: yes
+  with_items:
+    - "{{ producer_home }}"
+    - "{{ producer_install_dir }}"
+
+- name: Start Tactic service
+  service:
+    name: tactic
+    state: started
+
+- name: Create Producer main project
+  command: /usr/local/bin/producer create_project main_project "{{ producer_main_project }}"
+
+- name: Create Toon Boom admin user
+  command: /usr/local/bin/producer create_user "{{ producer_admin_user }}" "{{ producer_admin_password }}" admin "{{ producer_admin_user }}"
+
+- name: Create administrator user
+  command: /usr/local/bin/producer create_user "{{ producer_username }}" "{{ producer_password }}" admin "{{ producer_username }}"
+  
+- name: Start Bridge service
+  service:
+    name: bridge
+    state: started
+
+- name: Create crontab file from Producer source directory
+  command: crontab -u "{{ producer_user }}" "{{ producer_home }}/tactic/src/bin/util/cleanup_temp_files.cronjob"
+
+- name: Setup logrotate
+  copy:
+    src: "{{ producer_home }}/tactic/src/install/config/logrotate-producer"
+    dest: /etc/logrotate.d/producer
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart ryslog
+  service:
+    name: rsyslog
+    state: restarted
+
+- name: Add /usr/local/bin to sudoers path
+  lineinfile:
+    path: /etc/sudoers.d/secure_path
+    state: present
+    regexp: 'Defaults'
+    line: 'Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin'
+    create: yes
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Cleanup temporary directory
+  file:
+    name: /producer-temp
+    state: absent

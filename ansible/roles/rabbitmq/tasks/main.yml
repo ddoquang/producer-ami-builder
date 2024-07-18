@@ -1,0 +1,78 @@
+---
+# tasks file for rabbitmq
+
+# Epel repo is required for RabbitMQ
+- name: Add EPEL repository
+  dnf:
+    name: "epel-release"
+    state: present
+
+- name: Download Erlang repository
+  get_url:
+    url: https://{{ erlang_repo }}
+    dest: ~/setup-erlang-rpm.sh
+    mode: 0755
+
+- name: Install Erlang repository
+  command: ~/setup-erlang-rpm.sh
+
+- name: Install Erlang packages
+  dnf:
+    name: "erlang"
+    state: present
+
+- name: Download RabbitMQ repository
+  get_url:
+    url: https://{{ rabbitmq_repo }}
+    dest: ~/setup-rabbitmq-rpm.sh
+    mode: 0755
+
+- name: Install RabbitMQ repository
+  command: ~/setup-rabbitmq-rpm.sh
+    
+- name: Install RabbitMQ packages
+  dnf:
+    name: "{{ rabbitmq_packages }}"
+    state: present
+
+- name: Start and enable RabbitMQ
+  service:
+    name: rabbitmq-server
+    state: started
+    enabled: yes  
+
+- name: Update /etc/hosts for VMWare
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }} "
+  with_items: 
+    - { regexp: '^127.0.0.1', line: '127.0.0.1 {{ host_name }} localhost localhost.localdomain localhost4 localhost4.localdomain4' }
+    - { regexp: '^::1', line: '::1 {{ host_name }} localhost localhost.localdomain localhost6 localhost6.localdomain6' }
+  when: ansible_system_vendor == "VMware, Inc."
+
+- name: Add RabbitMQ user account and permissions for Producer.
+  command: "{{ item }}"
+  with_items: 
+    - rabbitmqctl add_user "{{ rabbitmq_user }}" "{{ rabbitmq_password }}"
+    - rabbitmqctl set_permissions "{{ rabbitmq_user }}" "producer*" ".*" ".*"
+  # Continue running the playbook even if rabbitmq user exists.
+  ignore_errors: yes
+
+- name: Create RabbitMQ configuration directory.
+  file:
+    path: /etc/rabbitmq
+    state: directory
+
+- name: Add RabbitMQ configuration file.
+  template:
+    src: ../templates/rabbitmq.conf.j2
+    dest: /etc/rabbitmq/rabbitmq.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart RabbitMQ
+  service:
+    name: rabbitmq-server
+    state: restarted

@@ -1,0 +1,9 @@
+# Sysadmin users list
+# UIDs for sysadmins users: 2500 to 2999
+sysadmins:
+  - name: "mlavigne"
+    uid: 2500
+  - name: "ddoquang"
+    uid: 2501
+  - name: "ansible"
+    uid: 2503

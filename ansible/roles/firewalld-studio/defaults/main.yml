@@ -1,0 +1,10 @@
+---
+# defaults file for firewalld-vbox
+open_ports:
+  # SSH
+  - 22/tcp
+  # HTTP(S)
+  - 80/tcp
+  - 443/tcp
+  # AMPQ for RabbitMQ
+  - 5672/tcp

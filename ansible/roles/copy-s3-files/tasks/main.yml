@@ -1,0 +1,12 @@
+---
+- name: Create temporary directory for source files
+  file:
+    name: /producer-temp
+    state: directory
+    mode: '0755'
+
+- include_tasks: copy-files-cloud.yml
+  when: ansible_system_vendor == "Amazon EC2"
+
+- include_tasks: copy-files-studio.yml
+  when: ansible_virtualization_type == "virtualbox" or ansible_system_vendor == "VMware, Inc."

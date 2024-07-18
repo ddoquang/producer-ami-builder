@@ -1,0 +1,3 @@
+---
+# defaults
+packer_rhel_libselinux_package: libselinux-python

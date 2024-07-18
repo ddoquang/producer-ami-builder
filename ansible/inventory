@@ -1,0 +1,3 @@
+[producer_vm]
+127.0.0.1   ansible_user=ansible    ansible_ssh_private_key_file="~/.ssh/amazon-linux-2-test.pem"
+
